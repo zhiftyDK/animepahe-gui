@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from rapidfuzz import process, fuzz
 from pathlib import Path
 import subprocess, os, re, sys
+from githubupdater import github_updater
 
 def resource_path(filename):
     if getattr(sys, "frozen", False):
@@ -17,6 +18,14 @@ animepahe_cli = resource_path("animepahe-cli-beta.exe")
 ffmpeg_exe = resource_path("ffmpeg.exe")
 
 os.system(f"\"{animepahe_cli}\" --upgrade")
+try:
+    from version import VERSION
+    print(f"[Updater] Current version: {VERSION}")
+    github_updater("zhiftyDK/animepahe-gui", VERSION)
+except ImportError:
+    pass  # VERSION not found, skip update check
+except Exception as e:
+    print(f"[Updater] Update check failed: {e}")
 
 cookies = {
     '__ddg9_': '80.208.100.192',
@@ -81,7 +90,7 @@ selected_languages = questionary.checkbox(
     choices=languages
 ).ask()
 
-if "jp" in selected_languages:
+if "jp" in selected_languages and len(selected_languages) > 1:
     merge_audio = questionary.confirm("Merge audio tracks into single .mkv file?").ask()
 
 if not selected_anime or not selected_languages:
