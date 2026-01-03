@@ -1,4 +1,4 @@
-name: Build Windows Release
+name: Build and Release
 
 on:
   workflow_dispatch:
@@ -6,6 +6,10 @@ on:
       version:
         description: 'Release version (e.g., v1.0.0)'
         required: true
+
+permissions:
+  contents: write
+  releases: write
 
 jobs:
   build:
@@ -39,18 +43,12 @@ jobs:
             --add-binary "resources/windows/ffmpeg.exe;resources/windows" `
             animepahe.py
 
-      - name: Create GitHub release
+      - name: Create GitHub release and upload executable
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.version }}
           name: Release ${{ github.event.inputs.version }}
           body: Automated Windows release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload executable to release
-        uses: softprops/action-gh-release@v1
-        with:
           files: dist\animepahe.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
