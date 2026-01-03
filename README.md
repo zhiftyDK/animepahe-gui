@@ -16,6 +16,7 @@ This is a **beta version** and may encounter issues during operation. The curren
 - **Download Support**: Download anime episodes directly through the GUI tool with real-time progress tracking, speed monitoring, and ETA display
 - **Searchable Content**: Search for animes with a search string, it done using rapidfuzz.
 - **MKV Audio Track Merging**: When multiple languages are selected you can merge all audio tracks into one mkv file. Allowing for langauge selection in certain video players like Windows Media Player.
+**Self-Updating**: Automatically update to the latest version when running the app
 
 ## 🚀 Installation
 
@@ -62,9 +63,7 @@ pyinstaller --onefile ^
 - Some animes may not download: [Issue 43 animepahe-cli](https://github.com/Danushka-Madushan/animepahe-cli/issues/43)
 
 ## 🚧 Upcoming Features
-
 - **Improved ui**: Converting this project to a proper gui with Tkinter
-- **Self-Updating**: Automatically update to the latest version with the `--upgrade` argument
 
 ## 🧑‍🏭 Contributors
 Many thanks to [@Danushka-Madushan](https://github.com/Danushka-Madushan) for creating the [animepahe-cli](https://github.com/Danushka-Madushan/animepahe-cli) making this project possible. 
