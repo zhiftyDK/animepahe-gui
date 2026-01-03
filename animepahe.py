@@ -27,6 +27,8 @@ except ImportError:
 except Exception as e:
     print(f"[Updater] Update check failed: {e}")
 
+os.system('cls' if os.name == 'nt' else 'clear')
+
 cookies = {
     '__ddg9_': '80.208.100.192',
     '__ddgid_': 'ABmiCUaATsAIHTTF',
