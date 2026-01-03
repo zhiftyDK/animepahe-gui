@@ -5,11 +5,9 @@ permissions:
   actions: read
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g., v1.0.0)'
-        required: true
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0, v0.1.0, etc.
 
 jobs:
   build:
@@ -31,7 +29,7 @@ jobs:
       - name: Build executable with PyInstaller
         run: |
           pyinstaller --onefile `
-            --name animepahe `
+            --name animepahe-gui `
             --console `
             --add-binary "resources/windows/animepahe-cli-beta.exe;resources/windows" `
             --add-binary "resources/windows/ffmpeg.exe;resources/windows" `
@@ -40,9 +38,9 @@ jobs:
       - name: Create GitHub release and upload executable
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: Release ${{ github.event.inputs.version }}
+          tag_name: ${{ github.ref_name }}        # Automatically the tag that triggered the workflow
+          name: Release ${{ github.ref_name }}
           body: Automated Windows release
-          files: ./dist/animepahe.exe
+          files: ./dist/animepahe-gui.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

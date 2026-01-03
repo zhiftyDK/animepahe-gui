@@ -76,19 +76,15 @@ selected_anime = questionary.select(
 ).ask()
 
 languages = ["jp", "zh", "en"]
-selected_language = questionary.select(
+selected_languages = questionary.checkbox(
     "Select language",
     choices=languages
 ).ask()
 
-second_languages = ["skip", "jp", "zh", "en"]
-second_languages.remove(selected_language)
-selected_second_language = questionary.select(
-    "Select second language (optional)",
-    choices=second_languages
-).ask()
+if "jp" in selected_languages:
+    merge_audio = questionary.confirm("Merge audio tracks into single .mkv file?").ask()
 
-if not selected_anime or not selected_language:
+if not selected_anime or not selected_languages:
     print("No anime or language selected. Exiting...")
     exit(0)
 
@@ -257,18 +253,19 @@ def find_folder(original_title: str, score_threshold: int = 80) -> Path | None:
         return base_folder / match[0]
     return None
 
-if second_languages != "skip" or selected_second_language != None:
+if len(selected_languages) > 1:
     link = f"https://animepahe.si{matches[animes.index(selected_anime)]['href']}"
-    command = f"{animepahe_cli} -q 0 -a {selected_language} -l {link}"
-    download_anime(selected_anime, selected_language, command, rename_episodes=False)
-    second_command = f"{animepahe_cli} -q 0 -a {selected_second_language} -l {link}"
-    download_anime(selected_anime, selected_second_language, second_command, rename_episodes=False)
-    folder = find_folder(selected_anime)
-    if folder is None:
-        print("Could not find downloaded anime folder for merging.")
-    else:
-        merge_folder(folder)
+    for lang in selected_languages:
+        command = f"{animepahe_cli} -q 0 -a {lang} -l {link}"
+        download_anime(selected_anime, lang, command, rename_episodes=False)
+    if merge_audio:
+        folder = find_folder(selected_anime)
+        if folder is None:
+            print("Could not find downloaded anime folder for merging.")
+        else:
+            merge_folder(folder)
 else:
+    lang = selected_languages[0]
     link = f"https://animepahe.si{matches[animes.index(selected_anime)]['href']}"
-    command = f"{animepahe_cli} -q 0 -a {selected_language} -l {link}"
-    download_anime(selected_anime, selected_language, command)
+    command = f"{animepahe_cli} -q 0 -a {lang} -l {link}"
+    download_anime(selected_anime, lang, command)
