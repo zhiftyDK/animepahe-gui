@@ -42,7 +42,7 @@ def github_updater(repo: str, current_version: str):
     asset_url = assets[0]["browser_download_url"]
     print(f"[Updater] Downloading new version from {asset_url}...")
     try:
-        r = requests.get(asset_url, stream=True)
+        r = requests.get(asset_url, stream=True, verify=False)
         r.raise_for_status()
         with open(TMP_PATH, "wb") as f:
             shutil.copyfileobj(r.raw, f)
