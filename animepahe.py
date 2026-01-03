@@ -3,16 +3,14 @@ import questionary
 from bs4 import BeautifulSoup
 from rapidfuzz import process, fuzz
 from pathlib import Path
-import subprocess
-import os
-import re
-import sys
+import subprocess, os, re, sys
 
 def resource_path(filename):
-    """Get the path to a bundled resource when using PyInstaller"""
-    if getattr(sys, 'frozen', False):  # If running from PyInstaller bundle
-        return os.path.join(sys._MEIPASS, filename)
-    return os.path.join(os.path.abspath("."), filename)
+    if getattr(sys, "frozen", False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(base_path, "resources", "windows", filename)
 
 # Example usage:
 animepahe_cli = resource_path("animepahe-cli-beta.exe")

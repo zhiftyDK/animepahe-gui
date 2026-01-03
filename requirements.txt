@@ -1,0 +1,5 @@
+questionary
+bs4
+rapidfuzz
+requests
+pyinstaller
