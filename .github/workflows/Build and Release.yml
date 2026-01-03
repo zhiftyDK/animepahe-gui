@@ -32,12 +32,12 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile ^
-                      --name animepahe ^
-                      --console ^
-                      --add-binary "resources/windows/animepahe-cli-beta.exe;resources/windows" ^
-                      --add-binary "resources/windows/ffmpeg.exe;resources/windows" ^
-                      animepahe.py
+          pyinstaller --onefile `
+            --name animepahe `
+            --console `
+            --add-binary "resources/windows/animepahe-cli-beta.exe;resources/windows" `
+            --add-binary "resources/windows/ffmpeg.exe;resources/windows" `
+            animepahe.py
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
