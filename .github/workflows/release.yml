@@ -1,0 +1,54 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Copy Windows binaries
+        run: |
+          copy resources\windows\animepahe-cli-beta.exe .
+          copy resources\windows\ffmpeg.exe .
+
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile ^
+                      --name animepahe ^
+                      --console ^
+                      --add-binary "animepahe-cli-beta.exe;." ^
+                      --add-binary "ffmpeg.exe;." ^
+                      animepahe.py
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          body: Automated Windows release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload executable to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist\animepahe.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
