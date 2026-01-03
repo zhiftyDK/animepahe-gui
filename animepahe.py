@@ -110,7 +110,7 @@ def download_anime(selected_anime, language, command, rename_episodes=True):
     try:
         for line in process.stdout:
             if "Episodes:" in line:
-                print(f"Downloading {selected_anime}, Language: {language}, {int(line.split(": ")[1].strip())} episodes found.")
+                print(f"Downloading {selected_anime}, Language: {language}, {int(line.split(': ')[1].strip())} episodes found.")
             if "Downloading" in line:
                 if prev_name:
                     if(rename_episodes):
@@ -122,7 +122,7 @@ def download_anime(selected_anime, language, command, rename_episodes=True):
                 print(line.strip(), end="\r")
         if(rename_episodes):
             rename_episode(prev_name, current_episode)
-        print(f"\r{"Download completed!":<120}\n", end="")
+        print(f"\r{'Download completed!':<120}\n", end="")
     except KeyboardInterrupt:
         print("\nInterrupted! Terminating subprocess...")
     finally:
