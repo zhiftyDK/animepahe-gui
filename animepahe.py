@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from rapidfuzz import process, fuzz
 from pathlib import Path
 import subprocess, os, re, sys
-from githubupdater import github_updater
+from modules.githubupdater import github_updater
 
 def resource_path(filename):
     if getattr(sys, "frozen", False):
@@ -22,119 +22,14 @@ try:
     from version import VERSION
     print(f"[Updater] Current version: {VERSION}")
     github_updater("zhiftyDK/animepahe-gui", VERSION)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"AnimePahe Downloader GUI {VERSION}\n")
 except ImportError:
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"AnimePahe Downloader GUI\n")
     pass  # VERSION not found, skip update check
 except Exception as e:
     print(f"[Updater] Update check failed: {e}")
-
-os.system('cls' if os.name == 'nt' else 'clear')
-
-cookies = {
-    '__ddg9_': '80.208.100.192',
-    '__ddgid_': 'ABmiCUaATsAIHTTF',
-    '__ddgmark_': 'iBUkxSbHEnjoYNsY',
-    '__ddg2_': 'umr2NNwRpWsO9pDi',
-    '__ddg1_': 'SmguJNFGE0AajRM0ymy8',
-    'ddg_last_challenge': '1766357252660',
-    'latest': '6374',
-    'res': '1080',
-    'aud': 'jpn',
-    'av1': '0',
-    'ann-fakesite': '0',
-}
-
-response = requests.get('https://animepahe.si/anime', cookies=cookies)
-
-# Parse HTML
-soup = BeautifulSoup(response.text, 'html.parser')
-
-# Find the div with class "tab-content"
-tab_content_div = soup.find("div", class_="tab-content")
-
-# Extract all a tags
-a_tags = tab_content_div.find_all("a")
-
-# Save link and text in a list of dictionaries
-links_data = [{"href": a['href'], "text": a.text} for a in a_tags]
-
-texts = [entry["text"] for entry in links_data]
-
-# Function to perform fuzzy search and return top N matches
-def fuzzy_search(query, choices, top_n=5):
-    results = process.extract(query, choices, scorer=fuzz.WRatio, limit=top_n)
-    # results is a list of tuples: (match_text, score, index)
-    top_matches = []
-    for match_text, score, idx in results:
-        top_matches.append({
-            "text": match_text,
-            "href": links_data[idx]["href"],
-            "score": score
-        })
-    return top_matches
-
-try:
-    query = input("🔍 Enter search query: ")
-    matches = fuzzy_search(query, texts, top_n=5)
-
-    animes = [f"{m['text']}" for m in matches]
-except KeyboardInterrupt:
-    print("\nSearch cancelled...")
-    exit(0)
-
-selected_anime = questionary.select(
-    "Select anime",
-    choices=animes
-).ask()
-
-languages = ["jp", "zh", "en"]
-selected_languages = questionary.checkbox(
-    "Select language",
-    choices=languages
-).ask()
-
-if "jp" in selected_languages and len(selected_languages) > 1:
-    merge_audio = questionary.confirm("Merge audio tracks into single .mkv file?").ask()
-
-if not selected_anime or not selected_languages:
-    print("No anime or language selected. Exiting...")
-    exit(0)
-
-def remove_ansi_codes(s):
-    return re.sub(r'\x1b\[[0-9;]*m', '', s)
-
-def rename_episode(prev_name, current_episode):
-    for dirpath, dirnames, filenames in os.walk("."):
-        for filename in filenames:
-            if prev_name in filename:
-                old_path = os.path.join(dirpath, filename)
-                new_path = os.path.join(dirpath, f"Episode {current_episode}.mp4")
-                os.rename(old_path, new_path)
-
-def download_anime(selected_anime, language, command, rename_episodes=True):
-    prev_name = None
-    current_episode = 1
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-    try:
-        for line in process.stdout:
-            if "Episodes:" in line:
-                print(f"Downloading {selected_anime}, Language: {language}, {int(line.split(': ')[1].strip())} episodes found.")
-            if "Downloading" in line:
-                if prev_name:
-                    if(rename_episodes):
-                        rename_episode(prev_name, current_episode)
-                    current_episode += 1
-                prev_name = remove_ansi_codes(line.split("Downloading : ")[1].strip())
-                print(f"\r{line.strip():<120}")
-            if "%" in line:
-                print(line.strip(), end="\r")
-        if(rename_episodes):
-            rename_episode(prev_name, current_episode)
-        print(f"\r{'Download completed!':<120}\n", end="")
-    except KeyboardInterrupt:
-        print("\nInterrupted! Terminating subprocess...")
-    finally:
-        process.terminate()
-        process.wait()
 
 EP_REGEX = re.compile(r"_-_([0-9]{2})_")
 DUB_LANG_REGEX = re.compile(r"_([A-Za-z]{2,})_Dub")
@@ -245,9 +140,9 @@ def merge_folder(folder_path: str):
 def find_folder(original_title: str, score_threshold: int = 80) -> Path | None:
     """
     Finds the anime folder based on original title using RapidFuzz.
-    Base folder is the same folder as this script.
+    Base folder is the current working directory.
     """
-    base_folder = Path(__file__).parent  # Folder where the script is located
+    base_folder = Path(os.getcwd())  # <-- use current working directory
     dirs = [f for f in base_folder.iterdir() if f.is_dir()]
     if not dirs:
         return None
@@ -263,6 +158,113 @@ def find_folder(original_title: str, score_threshold: int = 80) -> Path | None:
     if match and match[1] >= score_threshold:
         return base_folder / match[0]
     return None
+
+cookies = {
+    '__ddg9_': '80.208.100.192',
+    '__ddgid_': 'ABmiCUaATsAIHTTF',
+    '__ddgmark_': 'iBUkxSbHEnjoYNsY',
+    '__ddg2_': 'umr2NNwRpWsO9pDi',
+    '__ddg1_': 'SmguJNFGE0AajRM0ymy8',
+    'ddg_last_challenge': '1766357252660',
+    'latest': '6374',
+    'res': '1080',
+    'aud': 'jpn',
+    'av1': '0',
+    'ann-fakesite': '0',
+}
+
+response = requests.get('https://animepahe.si/anime', cookies=cookies)
+
+# Parse HTML
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Find the div with class "tab-content"
+tab_content_div = soup.find("div", class_="tab-content")
+
+# Extract all a tags
+a_tags = tab_content_div.find_all("a")
+
+# Save link and text in a list of dictionaries
+links_data = [{"href": a['href'], "text": a.text} for a in a_tags]
+
+texts = [entry["text"] for entry in links_data]
+
+# Function to perform fuzzy search and return top N matches
+def fuzzy_search(query, choices, top_n=5):
+    results = process.extract(query, choices, scorer=fuzz.WRatio, limit=top_n)
+    # results is a list of tuples: (match_text, score, index)
+    top_matches = []
+    for match_text, score, idx in results:
+        top_matches.append({
+            "text": match_text,
+            "href": links_data[idx]["href"],
+            "score": score
+        })
+    return top_matches
+
+try:
+    query = input("🔍 Enter search query: ")
+    matches = fuzzy_search(query, texts, top_n=5)
+
+    animes = [f"{m['text']}" for m in matches]
+except KeyboardInterrupt:
+    print("\nSearch cancelled...")
+    exit(0)
+
+selected_anime = questionary.select(
+    "Select anime",
+    choices=animes
+).ask()
+
+languages = ["jp", "zh", "en"]
+selected_languages = questionary.checkbox(
+    "Select language",
+    choices=languages
+).ask()
+
+if "jp" in selected_languages and len(selected_languages) > 1:
+    merge_audio = questionary.confirm("Merge audio tracks into single .mkv file?").ask()
+
+if not selected_anime or not selected_languages:
+    print("No anime or language selected. Exiting...")
+    exit(0)
+
+def remove_ansi_codes(s):
+    return re.sub(r'\x1b\[[0-9;]*m', '', s)
+
+def rename_episode(prev_name, current_episode):
+    for dirpath, dirnames, filenames in os.walk("."):
+        for filename in filenames:
+            if prev_name in filename:
+                old_path = os.path.join(dirpath, filename)
+                new_path = os.path.join(dirpath, f"Episode {current_episode}.mp4")
+                os.rename(old_path, new_path)
+
+def download_anime(selected_anime, language, command, rename_episodes=True):
+    prev_name = None
+    current_episode = 1
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    try:
+        for line in process.stdout:
+            if "Episodes:" in line:
+                print(f"Downloading {selected_anime}, Language: {language}, {int(line.split(': ')[1].strip())} episodes found.")
+            if "Downloading" in line:
+                if prev_name:
+                    if(rename_episodes):
+                        rename_episode(prev_name, current_episode)
+                    current_episode += 1
+                prev_name = remove_ansi_codes(line.split("Downloading : ")[1].strip())
+                print(f"\r{line.strip():<120}")
+            if "%" in line:
+                print(line.strip(), end="\r")
+        if(rename_episodes):
+            rename_episode(prev_name, current_episode)
+        print(f"\r{'Download completed!':<120}\n", end="")
+    except KeyboardInterrupt:
+        print("\nInterrupted! Terminating subprocess...")
+    finally:
+        process.terminate()
+        process.wait()
 
 if len(selected_languages) > 1:
     link = f"https://animepahe.si{matches[animes.index(selected_anime)]['href']}"
