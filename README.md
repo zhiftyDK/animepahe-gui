@@ -46,11 +46,13 @@ pyinstaller --onefile ^
 ### Dependencies
 - **animepahe-cli-beta.exe**: [The anime downloader cli tool](https://github.com/Danushka-Madushan/animepahe-cli)
 - **ffmpeg.exe**: FFmpeg is used to merge audio tracks from videos into multilingual mkv.
+- **Python Dependencies**: questionary, bs4, rapidfuzz, requests, pyinstaller
 
 ### Build Requirements
 - Python 3.11 or higher
 - FFmpeg
 - Animepahe-Cli
+- requirements.txt
 
 ## 🐛 Known Issues
 - Language selection may not work with every anime, as availability depends on the source content
@@ -64,7 +66,7 @@ pyinstaller --onefile ^
 - **Improved ui**: Converting this project to a proper gui with Tkinter
 - **Self-Updating**: Automatically update to the latest version with the `--upgrade` argument
 
-## Contributors
+## 🧑‍🏭 Contributors
 Many thanks to [@Danushka-Madushan](https://github.com/Danushka-Madushan) for creating the [animepahe-cli](https://github.com/Danushka-Madushan/animepahe-cli) making this project possible. 
 
 ## 📄 License
